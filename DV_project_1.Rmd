@@ -1,0 +1,231 @@
+---
+title: "DV_project_1"
+output: html_document
+---
+---------------------
+Measeles cases over Time
+
+--------------------
+
+```{r}
+# Load required libraries
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+library(scales)
+
+# Read the CSV file
+data <- read.csv("measles_data.csv", stringsAsFactors = FALSE)
+
+# Convert from_date to Date format and extract year
+data$from_date <- as.Date(data$from_date)
+data$year <- year(data$from_date)
+
+# Aggregate cases by year and convert to millions
+yearly_cases <- data %>%
+  group_by(year) %>%
+  summarise(total_cases = sum(number, na.rm = TRUE)) %>%
+  mutate(total_cases_millions = total_cases / 1000000)
+
+# Create the plot with millions scaling
+ggplot(yearly_cases, aes(x = year, y = total_cases_millions)) +
+  geom_line(color = "steelblue", size = 1) +
+  geom_point(color = "darkblue", size = 2) +
+  scale_y_continuous(labels = label_number(accuracy = 0.01, suffix = "M")) +
+  labs(title = "Measles Cases Over Time",
+       x = "Year",
+       y = "Number of Cases (Millions)") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+        axis.text = element_text(size = 10),
+        axis.title = element_text(size = 12))
+
+# Optional: Save the plot
+ggsave("measles_cases_by_year.png", width = 10, height = 6, dpi = 300)
+
+# Print summary statistics
+print(yearly_cases)
+
+```
+
+-------------------------------------------
+Before 1963
+-------------------------------------------
+```{r}
+
+# Load required libraries
+library(ggplot2)
+library(dplyr)
+library(maps)
+library(scales)
+library(lubridate)
+
+# Read your data
+data <- read.csv("measles_data.csv", stringsAsFactors = FALSE)
+
+# Convert from_date to Date format and extract year
+data$from_date <- as.Date(data$from_date)
+data$year <- year(data$from_date)
+
+# ============== BEFORE 1963 MAP ==============
+
+# Filter data for before 1963
+data_before_1963 <- data %>%
+  filter(year < 1963)
+
+# Aggregate cases by state for before 1963
+state_cases_before <- data_before_1963 %>%
+  group_by(state) %>%
+  summarise(total_cases = sum(number, na.rm = TRUE)) %>%
+  mutate(total_cases_millions = total_cases / 1000000)
+
+# Get US state map data
+states_map <- map_data("state")
+
+# Convert state abbreviations to full lowercase names
+state_mapping <- data.frame(
+  state = state.abb,
+  region = tolower(state.name)
+)
+
+# Join data with mapping
+state_cases_before <- state_cases_before %>%
+  left_join(state_mapping, by = "state")
+
+# Join with map data
+choropleth_data_before <- states_map %>%
+  left_join(state_cases_before, by = "region")
+
+# Find max value for consistent scaling
+max_cases_before <- max(state_cases_before$total_cases_millions, na.rm = TRUE)
+
+# Create choropleth map for BEFORE 1963 with better color contrast
+map_before <- ggplot(choropleth_data_before, aes(x = long, y = lat, group = group, fill = total_cases_millions)) +
+  geom_polygon(color = "white", size = 0.8) +
+  scale_fill_gradientn(
+    colors = c("#FFFFFF", "#FFF7E6", "#FFE5CC", "#FFD1A3", "#FFAD5C", 
+               "#FF8C42", "#FF6B2B", "#FF4500", "#E63900", "#CC3300", "#990000"),
+    name = "Total Cases\n(Millions)",
+    na.value = "grey95",
+    values = scales::rescale(c(0, 0.01, 0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 0.85, 0.95, 1)),
+    limits = c(0, max_cases_before),
+    labels = label_number(accuracy = 0.01)
+  ) +
+  labs(title = "Measles Cases in the U.S. Before 1963",
+       subtitle = "Total reported cases (in millions) - Pre-vaccine era") +
+  theme_void() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5, size = 12),
+    legend.position = "right",
+    legend.title = element_text(size = 11, face = "bold"),
+    legend.text = element_text(size = 10),
+    legend.key.height = unit(1.5, "cm"),
+    legend.key.width = unit(0.5, "cm"),
+    plot.background = element_rect(fill = "#f7f7f7", color = NA),
+    panel.background = element_rect(fill = "#f7f7f7", color = NA)
+  ) +
+  coord_map("albers", lat0 = 39, lat1 = 45)
+
+# Display the map
+print(map_before)
+
+# Save the plot
+ggsave("measles_before_1963.png", plot = map_before, width = 12, height = 7, dpi = 300)
+
+# Print summary statistics
+cat("\n=== BEFORE 1963 ===\n")
+print(state_cases_before %>% arrange(desc(total_cases)))
+cat("\nTotal cases before 1963:", sum(state_cases_before$total_cases, na.rm = TRUE), "\n")
+``` 
+-------------------------------------------
+After 1963
+-------------------------------------------
+
+```{r}
+# Load required libraries
+library(ggplot2)
+library(dplyr)
+library(maps)
+library(scales)
+library(lubridate)
+
+# Read your data
+data <- read.csv("measles_data.csv", stringsAsFactors = FALSE)
+
+# Convert from_date to Date format and extract year
+data$from_date <- as.Date(data$from_date)
+data$year <- year(data$from_date)
+
+# ============== AFTER 1963 MAP ==============
+
+# Get US state map data
+states_map <- map_data("state")
+
+# Convert state abbreviations to full lowercase names
+state_mapping <- data.frame(
+  state = state.abb,
+  region = tolower(state.name)
+)
+
+# Filter data for after 1963 (1963 and onwards)
+data_after_1963 <- data %>%
+  filter(year >= 1963)
+
+# Aggregate cases by state for after 1963
+state_cases_after <- data_after_1963 %>%
+  group_by(state) %>%
+  summarise(total_cases = sum(number, na.rm = TRUE)) %>%
+  mutate(total_cases_millions = total_cases / 1000000)
+
+# Join data with mapping
+state_cases_after <- state_cases_after %>%
+  left_join(state_mapping, by = "state")
+
+# Join with map data
+choropleth_data_after <- states_map %>%
+  left_join(state_cases_after, by = "region")
+
+# Find max value for consistent scaling
+max_cases_after <- max(state_cases_after$total_cases_millions, na.rm = TRUE)
+
+# Create choropleth map for AFTER 1963 with better color contrast
+map_after <- ggplot(choropleth_data_after, aes(x = long, y = lat, group = group, fill = total_cases_millions)) +
+  geom_polygon(color = "white", size = 0.8) +
+  scale_fill_gradientn(
+    colors = c("#FFFFFF", "#FFF7E6", "#FFE5CC", "#FFD1A3", "#FFAD5C", 
+               "#FF8C42", "#FF6B2B", "#FF4500", "#E63900", "#CC3300", "#990000"),
+    name = "Total Cases\n(Millions)",
+    na.value = "grey95",
+    values = scales::rescale(c(0, 0.01, 0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 0.85, 0.95, 1)),
+    limits = c(0, max_cases_after),
+    labels = label_number(accuracy = 0.01)
+  ) +
+  labs(title = "Measles Cases in the U.S. After 1963",
+       subtitle = "Total reported cases (in millions) - Post-vaccine era") +
+  theme_void() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5, size = 12),
+    legend.position = "right",
+    legend.title = element_text(size = 11, face = "bold"),
+    legend.text = element_text(size = 10),
+    legend.key.height = unit(1.5, "cm"),
+    legend.key.width = unit(0.5, "cm"),
+    plot.background = element_rect(fill = "#f7f7f7", color = NA),
+    panel.background = element_rect(fill = "#f7f7f7", color = NA)
+  ) +
+  coord_map("albers", lat0 = 39, lat1 = 45)
+
+# Display the map
+print(map_after)
+
+# Save the plot
+ggsave("measles_after_1963.png", plot = map_after, width = 12, height = 7, dpi = 300)
+
+# Print summary statistics
+cat("\n=== AFTER 1963 ===\n")
+print(state_cases_after %>% arrange(desc(total_cases)))
+cat("\nTotal cases after 1963:", sum(state_cases_after$total_cases, na.rm = TRUE), "\n")
+
+``` 
