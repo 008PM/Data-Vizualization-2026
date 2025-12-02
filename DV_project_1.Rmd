@@ -32,7 +32,7 @@ yearly_cases <- data %>%
 # Create the plot with millions scaling
 ggplot(yearly_cases, aes(x = year, y = total_cases_millions)) +
   geom_line(color = "steelblue", size = 1) +
-  geom_point(color = "darkblue", size = 2) +
+ # geom_point(color = "darkblue", size = 2) +
   scale_y_continuous(labels = label_number(accuracy = 0.01, suffix = "M")) +
   labs(title = "Measles Cases Over Time",
        x = "Year",
