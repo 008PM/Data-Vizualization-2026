@@ -231,3 +231,53 @@ print(state_cases_after %>% arrange(desc(total_cases)))
 cat("\nTotal cases after 1963:", sum(state_cases_after$total_cases, na.rm = TRUE), "\n")
 
 ``` 
+
+
+```{r}
+# Load required libraries
+library(ggplot2)
+library(dplyr)
+library(viridis)
+
+# Read the measles data
+measles_df <- read.csv("measles_data.csv")
+
+# Extract year from the 'from_date' column and prepare data
+measles_df$year <- as.numeric(substr(measles_df$from_date, 1, 4))
+measles_df$loc <- measles_df$state
+
+# Summarize the data (1950-1980, excluding AK and HI)
+heatmap_df <- measles_df %>%
+  filter(year >= 1950 & year <= 1980) %>%
+  filter(!loc %in% c("AK", "HI")) %>%
+  group_by(loc, year) %>%
+  summarise(incidence = sum(number, na.rm = TRUE), .groups = "drop")
+
+# Compute total incidence per state for ordering
+state_order <- heatmap_df %>%
+  group_by(loc) %>%
+  summarise(total_incidence = sum(incidence, na.rm = TRUE)) %>%
+  arrange(desc(total_incidence))
+
+# Reorder 'loc' factor levels
+heatmap_df <- heatmap_df %>%
+  mutate(loc = factor(loc, levels = state_order$loc))
+
+# Plot
+ggplot(heatmap_df, aes(x = year, y = loc, fill = incidence)) +
+  geom_tile(color = "white", linewidth = 0.1) +
+  scale_fill_viridis_c(option = "magma", name = "Cases", na.value = "grey90") +
+  scale_x_continuous(breaks = seq(1950, 1980, by = 5)) +
+  labs(
+    title = "Measles Cases by State and Year (1950–1980)",
+    x = "Year",
+    y = "State (ordered by total cases)"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(axis.text.y = element_text(size = 7))
+
+# To save with more vertical space:
+# ggsave("measles_heatmap.png", width = 12, height = 20, units = "in", dpi = 300)
+
+
+```
