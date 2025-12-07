@@ -1,7 +1,7 @@
 ---
 title: "DV_project_Dasaradha_Prashob"
 output: html_document
-Project: Version_3
+Project: Version_4
 ---
 ---------------------
 Measeles cases over Time
@@ -284,10 +284,12 @@ ggplot(heatmap_df, aes(x = year, y = loc, fill = incidence)) +
 
 ```
 ```{r}
+# Load required libraries
 library(ggplot2)
 library(dplyr)
 library(lubridate)
 library(scales)
+library(viridis)
 
 # Read the measles data
 measles_df <- read.csv("measles_data.csv")
@@ -321,12 +323,8 @@ season_summary <- measles_df %>%
     .groups = "drop"
   )
 
-# Set season order
-season_sum# Load required libraries
-library(ggplot2)
-library(dplyr)
-library(viridis)
-mary$season <- factor(season_summary$season, 
+# Set season order - FIXED: Changed "mary$season" to "season_summary$season"
+season_summary$season <- factor(season_summary$season, 
                                 levels = c("Winter", "Spring", "Summer", "Fall"))
 
 # Create sophisticated line graph with shaded confidence interval
@@ -370,6 +368,7 @@ ggsave("measles_seasonal_comparison_advanced.png", width = 12, height = 7, dpi =
 
 # Print detailed summary
 print(season_summary)
+
 
 ```
 
