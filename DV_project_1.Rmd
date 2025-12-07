@@ -1,7 +1,7 @@
 ---
 title: "DV_project_Dasaradha_Prashob"
 output: html_document
-Project: Version_1
+Project: Version_3
 ---
 ---------------------
 Measeles cases over Time
@@ -322,7 +322,11 @@ season_summary <- measles_df %>%
   )
 
 # Set season order
-season_summary$season <- factor(season_summary$season, 
+season_sum# Load required libraries
+library(ggplot2)
+library(dplyr)
+library(viridis)
+mary$season <- factor(season_summary$season, 
                                 levels = c("Winter", "Spring", "Summer", "Fall"))
 
 # Create sophisticated line graph with shaded confidence interval
