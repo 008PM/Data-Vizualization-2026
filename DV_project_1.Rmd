@@ -253,31 +253,470 @@ heatmap_df <- measles_df %>%
   group_by(loc, year) %>%
   summarise(incidence = sum(number, na.rm = TRUE), .groups = "drop")
 
-# Compute total incidence per state for ordering
-state_order <- heatmap_df %>%
+# Compute total incidence per state and get top 20
+top_20_states <- heatmap_df %>%
   group_by(loc) %>%
   summarise(total_incidence = sum(incidence, na.rm = TRUE)) %>%
-  arrange(desc(total_incidence))
+  arrange(desc(total_incidence)) %>%
+  head(20) %>%
+  pull(loc)
 
-# Reorder 'loc' factor levels
+# Filter data for top 20 states and reorder factor
 heatmap_df <- heatmap_df %>%
-  mutate(loc = factor(loc, levels = state_order$loc))
+  filter(loc %in% top_20_states) %>%
+  mutate(loc = factor(loc, levels = top_20_states))
 
 # Plot
 ggplot(heatmap_df, aes(x = year, y = loc, fill = incidence)) +
   geom_tile(color = "white", linewidth = 0.1) +
-  scale_fill_viridis_c(option = "magma", name = "Cases", na.value = "grey90") +
+  scale_fill_gradient(low = "lightblue", high = "darkred", name = "Cases", na.value = "grey90") +
   scale_x_continuous(breaks = seq(1950, 1980, by = 5)) +
   labs(
-    title = "Measles Cases by State and Year (1950–1980)",
+    title = "Measles Cases by State and Year (1950–1980) - Top 20 States",
     x = "Year",
     y = "State (ordered by total cases)"
   ) +
   theme_minimal(base_size = 13) +
   theme(axis.text.y = element_text(size = 7))
 
-# To save with more vertical space:
-# ggsave("measles_heatmap.png", width = 12, height = 20, units = "in", dpi = 300)
+# To save with adjusted vertical space for 20 states:
+# ggsave("measles_heatmap_top20.png", width = 12, height = 10, units = "in", dpi = 300)
 
+```
+```{r}
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+library(scales)
+
+# Read the measles data
+measles_df <- read.csv("measles_data.csv")
+
+# Convert from_date to Date format
+measles_df$from_date <- as.Date(measles_df$from_date)
+
+# Extract month and assign season
+measles_df <- measles_df %>%
+  mutate(
+    month = month(from_date),
+    season = case_when(
+      month %in% c(12, 1, 2) ~ "Winter",
+      month %in% c(3, 4, 5) ~ "Spring",
+      month %in% c(6, 7, 8) ~ "Summer",
+      month %in% c(9, 10, 11) ~ "Fall"
+    )
+  )
+
+# Calculate average, median, and confidence intervals by season
+season_summary <- measles_df %>%
+  group_by(season) %>%
+  summarise(
+    avg_cases = mean(number, na.rm = TRUE),
+    median_cases = median(number, na.rm = TRUE),
+    sd_cases = sd(number, na.rm = TRUE),
+    n = n(),
+    se = sd_cases / sqrt(n),
+    ci_lower = avg_cases - 1.96 * se,
+    ci_upper = avg_cases + 1.96 * se,
+    .groups = "drop"
+  )
+
+# Set season order
+season_summary$season <- factor(season_summary$season, 
+                                levels = c("Winter", "Spring", "Summer", "Fall"))
+
+# Create sophisticated line graph with shaded confidence interval
+ggplot(season_summary, aes(x = season, y = avg_cases, group = 1)) +
+  # Add shaded confidence interval
+  geom_ribbon(aes(ymin = ci_lower, ymax = ci_upper), 
+              alpha = 0.2, fill = "steelblue") +
+  # Add line
+  geom_line(color = "#2C5F8D", size = 1.5, linetype = "solid") +
+  # Add points with larger size
+  geom_point(color = "#2C5F8D", size = 4, shape = 21, fill = "white", stroke = 2) +
+  # Add value labels above points
+  geom_text(aes(label = comma(round(avg_cases, 0))), 
+            vjust = -1.5, size = 4, fontface = "bold", color = "#2C5F8D") +
+  labs(
+    title = "Seasonal Distribution of Measles Cases",
+    subtitle = "Average cases per season with 95% confidence intervals",
+    x = NULL,
+    y = "Average Number of Cases",
+    caption = "Shaded area represents 95% confidence interval"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold", 
+                              margin = margin(b = 5)),
+    plot.subtitle = element_text(hjust = 0.5, size = 11, color = "gray40",
+                                 margin = margin(b = 15)),
+    plot.caption = element_text(size = 9, color = "gray50", hjust = 0),
+    axis.text.x = element_text(size = 12, face = "bold"),
+    axis.text.y = element_text(size = 11),
+    axis.title.y = element_text(size = 12, face = "bold", margin = margin(r = 10)),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.y = element_line(color = "gray90", linetype = "dashed"),
+    plot.margin = margin(20, 20, 20, 20)
+  ) +
+  scale_y_continuous(labels = comma, expand = expansion(mult = c(0.05, 0.15)))
+
+# Optional: Save the plot
+ggsave("measles_seasonal_comparison_advanced.png", width = 12, height = 7, dpi = 300)
+
+# Print detailed summary
+print(season_summary)
+
+```
+
+```{r}
+# Load required libraries for plotting, data manipulation, dates, and formatting
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+library(scales)
+
+# Read the CSV file containing measles data into a data frame
+measles_df <- read.csv("measles_data.csv")
+
+# Convert the 'from_date' column from text/character format to actual Date objects
+measles_df$from_date <- as.Date(measles_df$from_date)
+
+# Extract month number (1-12) from the date and add it as a new column
+measles_df$month <- month(measles_df$from_date)
+
+# Calculate total cases for each month across all years
+monthly_trend <- measles_df %>%
+  # Remove any rows where month is missing (NA values)
+  dplyr::filter(!is.na(month)) %>%
+  # Group all rows by their month number
+  group_by(month) %>%
+  # For each month, sum up all the cases from all years
+  summarise(total_cases = sum(number, na.rm = TRUE), .groups = "drop")
+
+
+# Create an enhanced version with color gradient based on case counts
+ggplot(monthly_trend, aes(x = factor(month), y = total_cases, fill = total_cases)) +
+  # Create bars with fill color varying by case count
+  geom_bar(stat = "identity",           # Use actual y values
+           color = "white",             # White border around each bar
+           size = 0.5) +                # Thin border line
+  # Convert to polar coordinates
+  coord_polar() +
+  # Use a color gradient from light yellow (low) to dark red (high)
+  scale_fill_gradient(low = "lightyellow", 
+                      high = "darkred",
+                      name = "Total Cases",           # Legend title
+                      labels = comma) +               # Format legend numbers with commas
+  # Add titles and labels
+  labs(
+    title = "Seasonal Pattern of Measles Cases by Month",
+    subtitle = "Total cases aggregated across all years | Color intensity shows case volume",
+    x = "Month (1 = Jan, 12 = Dec)",
+    y = "Total Cases"
+  ) +
+  # Use minimal theme
+  theme_minimal(base_size = 12) +
+  # Customize appearance
+  theme(
+    # Center and style the title
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold", 
+                              margin = margin(b = 5)),
+    # Center and style the subtitle
+    plot.subtitle = element_text(hjust = 0.5, size = 10, color = "gray40",
+                                 margin = margin(b = 15)),
+    # Bold month labels
+    axis.text.x = element_text(face = "bold", size = 10),
+    # Format y-axis labels
+    axis.text.y = element_text(size = 9),
+    # Position legend at the bottom
+    legend.position = "bottom",
+    # Make legend horizontal
+    legend.direction = "horizontal",
+    # Set legend width
+    legend.key.width = unit(2, "cm")
+  ) +
+  # Format y-axis with commas
+  scale_y_continuous(labels = comma)
+
+# Save the enhanced polar chart
+ggsave("measles_seasonal_polar_gradient.png", 
+       width = 11,        # Slightly wider for legend
+       height = 11,       # Square dimensions
+       dpi = 300)         # High resolution
+
+# Print monthly statistics
+print(monthly_trend)
+
+```
+```{r}
+# Load required libraries (all standard libraries available on Linux)
+library(ggplot2)
+library(dplyr)
+library(maps)        # For US map data (usually pre-installed)
+library(viridis)     # For color schemes
+
+# Read the measles data
+measles_df <- read.csv("measles_data.csv")
+
+# Extract year from the 'from_date' column
+measles_df$year <- as.numeric(substr(measles_df$from_date, 1, 4))
+
+# Summarize measles cases by state and year (1950-1990)
+summary_df <- measles_df %>%
+  filter(year >= 1950 & year <= 1990) %>%
+  group_by(state, year) %>%
+  summarise(total_cases = sum(number, na.rm = TRUE), .groups = "drop") %>%
+  rename(loc = state)
+
+# Get US state map data from the maps package
+states_map <- map_data("state")
+
+# Create a lookup table to match state abbreviations to full names (lowercase)
+state_names <- data.frame(
+  loc = state.abb,                              # State abbreviations (AK, AL, AR, etc.)
+  region = tolower(state.name),                 # State full names in lowercase
+  stringsAsFactors = FALSE
+)
+
+# Add DC manually if needed
+state_names <- rbind(state_names, data.frame(loc = "DC", region = "district of columbia"))
+
+# Join state names to summary data
+summary_df <- summary_df %>%
+  left_join(state_names, by = "loc")
+
+# Create a complete grid of all states × years
+all_years <- 1950:1990                         # Range of years to analyze
+all_regions <- unique(states_map$region)       # All state regions from map data
+
+complete_grid <- expand.grid(region = all_regions, year = all_years, stringsAsFactors = FALSE)
+
+# Join summarized data into the complete grid
+summary_df_complete <- complete_grid %>%
+  left_join(summary_df, by = c("region", "year"))
+
+# Join with the spatial map data
+map_df_complete <- left_join(states_map, summary_df_complete, by = "region")
+
+# Create static plots for each year (since gganimate might not be available)
+# Option 1: Create faceted plot showing multiple years at once
+# Filter for specific years to avoid too many panels (every 5 years)
+selected_years <- seq(1950, 1990, by = 5)      # Years: 1950, 1955, 1960, ..., 1990
+
+ggplot(data = filter(map_df_complete, year %in% selected_years)) +
+  # Draw the map with fill color based on total cases
+  geom_polygon(aes(x = long, y = lat, group = group, fill = total_cases), 
+               color = "white",                 # White borders between states
+               size = 0.2) +                    # Thin border lines
+  # Use gradient color scheme from light yellow to dark red
+  scale_fill_gradient(
+    low = "lightyellow",                        # Color for low case counts
+    high = "darkred",                           # Color for high case counts
+    na.value = "gray90",                        # Gray for missing data
+    name = "Total Cases",                       # Legend title
+    labels = scales::comma                      # Format numbers with commas
+  ) +
+  # Create separate panel for each year
+  facet_wrap(~ year, ncol = 3) +               # 3 columns of maps
+  # Add titles and labels
+  labs(
+    title = "Measles Cases by State (1950–1990)",
+    subtitle = "Snapshot every 5 years"
+  ) +
+  # Equal aspect ratio so map isn't distorted
+  coord_fixed(1.3) +                            # 1.3 ratio works well for US map
+  # Use minimal theme
+  theme_minimal() +
+  theme(
+    # Remove axis text and ticks (not needed for maps)
+    axis.text = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title = element_blank(),
+    # Style the title
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 11, color = "gray40", hjust = 0.5),
+    # Style facet labels (year labels)
+    strip.text = element_text(size = 11, face = "bold"),
+    # Remove grid lines
+    panel.grid = element_blank()
+  )
+
+# Save the faceted map
+ggsave("measles_map_faceted.png", width = 14, height = 12, dpi = 300)
+
+
+# Option 2: Create individual maps for specific years of interest
+# --------------------------------------------------------------
+
+# Function to create a single year map
+plot_year_map <- function(selected_year) {
+  # Filter data for the selected year
+  year_data <- filter(map_df_complete, year == selected_year)
+  
+  # Create the map
+  p <- ggplot(data = year_data) +
+    geom_polygon(aes(x = long, y = lat, group = group, fill = total_cases), 
+                 color = "white", size = 0.3) +
+    scale_fill_gradient(
+      low = "lightyellow",
+      high = "darkred",
+      na.value = "gray90",
+      name = "Total Cases",
+      labels = scales::comma,
+      # Set consistent limits across all years for comparison
+      limits = c(0, max(summary_df$total_cases, na.rm = TRUE))
+    ) +
+    labs(
+      title = paste("Measles Cases by State —", selected_year),
+      subtitle = paste("Total reported cases:", 
+                      scales::comma(sum(year_data$total_cases, na.rm = TRUE)))
+    ) +
+    coord_fixed(1.3) +
+    theme_minimal() +
+    theme(
+      axis.text = element_blank(),
+      axis.ticks = element_blank(),
+      axis.title = element_blank(),
+      plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+      plot.subtitle = element_text(size = 12, color = "gray40", hjust = 0.5),
+      panel.grid = element_blank(),
+      legend.position = "right"
+    )
+  
+  return(p)
+}
+
+# Create maps for key years
+key_years <- c(1950, 1960, 1970, 1980, 1990)   # Pre-vaccine, post-vaccine, elimination era
+
+# Generate and save individual maps
+for (yr in key_years) {
+  p <- plot_year_map(yr)
+  ggsave(paste0("measles_map_", yr, ".png"), plot = p, 
+         width = 12, height = 8, dpi = 300)
+}
+
+# Print summary statistics
+print(summary_df %>% group_by(year) %>% summarise(total = sum(total_cases, na.rm = TRUE)))
+```
+
+```{r}
+# Load required libraries
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(lubridate)
+
+# Read the measles data
+measles_df <- read.csv("measles_data.csv")
+
+# Convert from_date to Date format and extract year
+measles_df$from_date <- as.Date(measles_df$from_date)
+measles_df$year <- year(measles_df$from_date)
+
+# Aggregate cases by year for the period 1960-2000
+yearly_cases <- measles_df %>%
+  filter(year >= 1960 & year <= 2000) %>%             # Filter years 1960-2000
+  group_by(year) %>%                                   # Group by year
+  summarise(total_cases = sum(number, na.rm = TRUE),  # Sum all cases per year
+            .groups = "drop")
+
+# Find the max value for positioning
+max_cases <- max(yearly_cases$total_cases, na.rm = TRUE)
+
+# Create minimalistic plot
+ggplot(yearly_cases, aes(x = year, y = total_cases)) +
+  # Shaded background for resurgence (1989-1991)
+  annotate("rect",                                     
+           xmin = 1989, xmax = 1991,                   
+           ymin = 0, ymax = Inf,                       
+           alpha = 0.12,                               
+           fill = "#E74C3C") +                         
+  # Vaccine introduction marker (1963)
+  geom_vline(xintercept = 1963,                        
+             linetype = "dashed",                      
+             color = "#27AE60",                        # Green for vaccine
+             size = 0.8,                               
+             alpha = 0.7) +                            
+  annotate("text",                                     
+           x = 1963, y = max_cases * 0.90,             
+           label = "",                          
+           size = 3.5,                                 
+           color = "#27AE60",                          
+           fontface = "bold",
+           angle = 90,                                 # Vertical text
+           vjust = -0.5) +                             
+  # Elimination goal marker (1978)
+  geom_vline(xintercept = 1978,                        
+             linetype = "dashed",                      
+             color = "#3498DB",                        # Blue for goal
+             size = 0.8,                               
+             alpha = 0.7) +                            
+  annotate("text",                                     
+           x = 1978, y = max_cases * 0.90,             
+           label = "",                             
+           size = 3.5,                                 
+           color = "#3498DB",                          
+           fontface = "bold",
+           angle = 90,                                 
+           vjust = -0.5) +                             
+  # Resurgence label
+  annotate("text",                                     
+           x = 1990, y = max_cases * 0.95,             
+           label = "",                       
+           size = 3.5,                                 
+           color = "#C0392B",                          
+           fontface = "bold") +                        
+  # Main line
+  geom_line(color = "#2C3E50",                         
+            size = 1.3) +                              
+  # Area fill
+  geom_area(fill = "#34495E",                          
+            alpha = 0.2) +                             
+  # Simple points
+  geom_point(color = "#2C3E50",                        
+             size = 1.8) +                             
+  # Highlight resurgence years
+  geom_point(data = filter(yearly_cases, year >= 1989 & year <= 1991),
+             aes(x = year, y = total_cases),
+             color = "#E74C3C",                        
+             size = 3.5) +                             
+  # Minimal axis formatting
+  scale_y_continuous(labels = comma,                   
+                     expand = expansion(mult = c(0, 0.08))) +
+  scale_x_continuous(breaks = seq(1960, 2000, by = 10)) +
+  # Minimal labels
+  labs(
+    title = "Measles Cases (1960–2000)",
+    x = NULL,                                          # Remove x-axis label
+    y = "Cases"                                        # Short y-axis label
+  ) +
+  # Clean minimal theme
+  theme_minimal(base_size = 11) +
+  theme(
+    plot.title = element_text(hjust = 0.5,             
+                              size = 14,               
+                              face = "bold",
+                              margin = margin(b = 20)),
+    axis.title.y = element_text(size = 11, 
+                                face = "bold",
+                                margin = margin(r = 10)),
+    axis.text = element_text(size = 10),
+    panel.grid.minor = element_blank(),                
+    panel.grid.major.x = element_blank(),              # Remove vertical grid
+    panel.grid.major.y = element_line(color = "gray92",
+                                      size = 0.3),     # Subtle horizontal grid
+    plot.margin = margin(15, 15, 15, 15)               
+  )
+
+# Save the plot
+ggsave("measles_resurgence_minimal.png", 
+       width = 12,                                     
+       height = 6,                                     
+       dpi = 300)
+
+# Print yearly data
+print(yearly_cases)
 
 ```
