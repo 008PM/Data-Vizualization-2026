@@ -1,7 +1,7 @@
 ---
 title: "DV_project_Dasaradha_Prashob"
 output: html_document
-Project: Version_4
+Project: Version_5
 ---
 ---------------------
 Measeles cases over Time
@@ -721,5 +721,190 @@ ggsave("measles_resurgence_minimal.png",
 
 # Print yearly data
 print(yearly_cases)
+
+```
+
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(scales)
+library(ggrepel)
+
+# 1. Read measles data
+measles_df <- read.csv("measles_data.csv")
+
+# Ensure consistent city naming
+measles_df$loc <- toupper(measles_df$loc)
+
+# Add year and filter period 1950–1990
+measles_df$from_date <- as.Date(measles_df$from_date)
+measles_df$year <- year(measles_df$from_date)
+
+measles_period <- measles_df %>%
+  filter(year >= 1950 & year <= 1990)
+
+# 2. Aggregate total cases per city over 1950–1990
+city_cases <- measles_period %>%
+  group_by(loc, state) %>%
+  summarise(total_cases = sum(number, na.rm = TRUE), .groups = "drop")
+
+# 3. City population lookup (example: 1960 census for major cities) [web:36][web:38]
+city_pop <- tibble::tribble(
+  ~loc,           ~state, ~population,
+  "NEW YORK",     "NY",   7781984,
+  "CHICAGO",      "IL",   3550404,
+  "LOS ANGELES",  "CA",   2479015,
+  "PHILADELPHIA", "PA",   2002512,
+  "DETROIT",      "MI",   1670144,
+  "BALTIMORE",    "MD",    939024,
+  "BOSTON",       "MA",    697197,
+  "CLEVELAND",    "OH",    914808,
+  "ST. LOUIS",    "MO",    750026,
+  "PITTSBURGH",   "PA",    604332
+)
+
+# 4. Join measles totals with population and keep top 10 by population
+city_merged <- city_cases %>%
+  inner_join(city_pop, by = c("loc", "state"))
+
+top10 <- city_merged %>%
+  arrange(desc(population)) %>%
+  slice_head(n = 10)
+
+# 5. Log–log scatterplot: population vs total cases (1950–1990)
+ggplot(top10, aes(x = population, y = total_cases)) +
+  geom_point(color = "#2C3E50", size = 3) +
+  geom_smooth(method = "lm", se = FALSE,
+              color = "#E74C3C", linewidth = 1) +
+  geom_text_repel(aes(label = loc), size = 3, max.overlaps = 20) +
+  scale_x_log10(labels = comma) +
+  scale_y_log10(labels = comma) +
+  labs(
+    title = "Measles burden vs city size (top 10 US cities)",
+    subtitle = "Total measles cases, 1950–1990, vs 1960 census population (log–log)",
+    x = "City population (log scale)",
+    y = "Total measles cases, 1950–1990 (log scale)"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5),
+    panel.grid.minor = element_blank()
+  )
+
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(scales)
+
+measles_df <- read.csv("measles_data.csv")
+measles_df$from_date <- as.Date(measles_df$from_date)
+measles_df$year <- year(measles_df$from_date)
+
+# 20-year window around vaccine licensure (1963)
+yearly <- measles_df %>%
+  filter(year >= 1953, year <= 1972) %>%
+  group_by(year) %>%
+  summarise(total_cases = sum(number, na.rm = TRUE), .groups = "drop") %>%
+  mutate(period = if_else(year < 1963, "Pre‑vaccine", "Post‑vaccine"))
+
+ggplot(yearly, aes(x = factor(year), y = total_cases, fill = period)) +
+  geom_col(width = 0.8) +
+  scale_y_continuous(labels = comma) +
+  scale_fill_manual(values = c("Pre‑vaccine" = "#C0392B",   # red
+                               "Post‑vaccine" = "#27AE60") # green
+  ) +
+  geom_vline(xintercept = which(levels(factor(yearly$year)) == "1963"),
+             linetype = "dashed", color = "gray30") +
+  labs(
+    title = "Measles cases in the US, 10 years before and after the 1963 vaccine",
+    x = NULL,
+    y = "Total reported cases",
+    fill = NULL
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.text.x = element_text(angle = 60, hjust = 1),
+    legend.position = "top"
+  )
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(scales)
+
+# 1. Read and prepare data
+measles_df <- read.csv("measles_data.csv")
+
+measles_df$from_date <- as.Date(measles_df$from_date)
+measles_df$year      <- year(measles_df$from_date)
+measles_df$loc       <- toupper(measles_df$loc)
+
+# 2. Choose 20-year window and a single city
+start_year <- 1950
+end_year   <- 1969          # 20 years: 1950–1969
+target_city <- "NEW YORK"   # change to the city you want
+
+city_20yrs <- measles_df %>%
+  filter(year >= start_year,
+         year <= end_year,
+         loc == target_city)
+
+# 3. Aggregate to city-year totals
+city_year <- city_20yrs %>%
+  group_by(year) %>%
+  summarise(total_cases = sum(number, na.rm = TRUE), .groups = "drop")
+
+# 4. Compute mean, sd, and z-score across the 20 years
+city_year_z <- city_year %>%
+  mutate(
+    mean_city = mean(total_cases, na.rm = TRUE),
+    sd_city   = sd(total_cases,   na.rm = TRUE),
+    z_score   = ifelse(sd_city > 0,
+                       (total_cases - mean_city) / sd_city,
+                       0)
+  )
+
+# 5. Keep the 10 most anomalous years (highest z-scores)
+city_year_top10 <- city_year_z %>%
+  slice_max(order_by = z_score, n = 10, with_ties = FALSE) %>%
+  arrange(year) %>%
+  mutate(anomaly = z_score >= 2)
+
+# 6. Bar chart of z-scores for those 10 years
+ggplot(city_year_top10,
+       aes(x = factor(year),
+           y = z_score,
+           fill = anomaly)) +
+  geom_col(width = 0.8) +
+  scale_fill_manual(
+    values = c(`FALSE` = "#3498DB",    # blue: elevated but not extreme
+               `TRUE`  = "#E74C3C"),   # red: strong anomalies (z >= 2)
+    labels = c("Peak year", "Strong anomaly (z ≥ 2)"),
+    name   = NULL
+  ) +
+  geom_hline(yintercept = 2, linetype = "dashed",
+             color = "grey40", linewidth = 0.5) +
+  labs(
+    title = paste0("Most anomalous measles years in ", target_city,
+                   " (", start_year, "–", end_year, ")"),
+    subtitle = "Top 10 years by z-score; red bars indicate z ≥ 2",
+    x = "Year",
+    y = "Z-score (standardized cases)"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    plot.title    = element_text(hjust = 0.5, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5),
+    axis.text.x   = element_text(angle = 60, hjust = 1)
+  )
 
 ```
