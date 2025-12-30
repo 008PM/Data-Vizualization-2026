@@ -1,7 +1,7 @@
 ---
 title: "DV_project_Dasaradha_Prashob"
 output: html_document
-Project: Version_5
+Project: Version_7
 ---
 ---------------------
 Measeles cases over Time
@@ -51,187 +51,122 @@ print(yearly_cases)
 ```
 
 -------------------------------------------
-Before 1963
+Before and after 1963
 -------------------------------------------
 ```{r}
-
-# Load required libraries
 library(ggplot2)
 library(dplyr)
 library(maps)
 library(scales)
 library(lubridate)
+library(patchwork)   # install.packages("patchwork")
 
-# Read your data
+# Read data
 data <- read.csv("measles_data.csv", stringsAsFactors = FALSE)
-
-# Convert from_date to Date format and extract year
 data$from_date <- as.Date(data$from_date)
-data$year <- year(data$from_date)
+data$year      <- year(data$from_date)
 
-# ============== BEFORE 1963 MAP ==============
-
-# Filter data for before 1963
-data_before_1963 <- data %>%
-  filter(year < 1963)
-
-# Aggregate cases by state for before 1963
-state_cases_before <- data_before_1963 %>%
-  group_by(state) %>%
-  summarise(total_cases = sum(number, na.rm = TRUE)) %>%
-  mutate(total_cases_millions = total_cases / 1000000)
-
-# Get US state map data
+# State map + mapping
 states_map <- map_data("state")
-
-# Convert state abbreviations to full lowercase names
 state_mapping <- data.frame(
-  state = state.abb,
+  state  = state.abb,
   region = tolower(state.name)
 )
 
-# Join data with mapping
-state_cases_before <- state_cases_before %>%
-  left_join(state_mapping, by = "state")
+# Helper: aggregate by state for a given filter
+agg_by_state <- function(df) {
+  df %>%
+    group_by(state) %>%
+    summarise(total_cases = sum(number, na.rm = TRUE), .groups = "drop") %>%
+    mutate(total_cases_millions = total_cases / 1e6) %>%
+    left_join(state_mapping, by = "state")
+}
+
+# Before / after datasets
+state_cases_before <- agg_by_state(filter(data, year < 1963))
+state_cases_after  <- agg_by_state(filter(data, year >= 1963))
 
 # Join with map data
 choropleth_data_before <- states_map %>%
   left_join(state_cases_before, by = "region")
 
-# Find max value for consistent scaling
-max_cases_before <- max(state_cases_before$total_cases_millions, na.rm = TRUE)
-
-# Create choropleth map for BEFORE 1963 with better color contrast
-map_before <- ggplot(choropleth_data_before, aes(x = long, y = lat, group = group, fill = total_cases_millions)) +
-  geom_polygon(color = "white", size = 0.8) +
-  scale_fill_gradientn(
-    colors = c("#FFFFFF", "#FFF7E6", "#FFE5CC", "#FFD1A3", "#FFAD5C", 
-               "#FF8C42", "#FF6B2B", "#FF4500", "#E63900", "#CC3300", "#990000"),
-    name = "Total Cases\n(Millions)",
-    na.value = "grey95",
-    values = scales::rescale(c(0, 0.01, 0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 0.85, 0.95, 1)),
-    limits = c(0, max_cases_before),
-    labels = label_number(accuracy = 0.01)
-  ) +
-  labs(title = "Measles Cases in the U.S. Before 1963",
-       subtitle = "Total reported cases (in millions) - Pre-vaccine era") +
-  theme_void() +
-  theme(
-    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
-    plot.subtitle = element_text(hjust = 0.5, size = 12),
-    legend.position = "right",
-    legend.title = element_text(size = 11, face = "bold"),
-    legend.text = element_text(size = 10),
-    legend.key.height = unit(1.5, "cm"),
-    legend.key.width = unit(0.5, "cm"),
-    plot.background = element_rect(fill = "#f7f7f7", color = NA),
-    panel.background = element_rect(fill = "#f7f7f7", color = NA)
-  ) +
-  coord_map("albers", lat0 = 39, lat1 = 45)
-
-# Display the map
-print(map_before)
-
-# Save the plot
-ggsave("measles_before_1963.png", plot = map_before, width = 12, height = 7, dpi = 300)
-
-# Print summary statistics
-cat("\n=== BEFORE 1963 ===\n")
-print(state_cases_before %>% arrange(desc(total_cases)))
-cat("\nTotal cases before 1963:", sum(state_cases_before$total_cases, na.rm = TRUE), "\n")
-``` 
--------------------------------------------
-After 1963
--------------------------------------------
-
-```{r}
-# Load required libraries
-library(ggplot2)
-library(dplyr)
-library(maps)
-library(scales)
-library(lubridate)
-
-# Read your data
-data <- read.csv("measles_data.csv", stringsAsFactors = FALSE)
-
-# Convert from_date to Date format and extract year
-data$from_date <- as.Date(data$from_date)
-data$year <- year(data$from_date)
-
-# ============== AFTER 1963 MAP ==============
-
-# Get US state map data
-states_map <- map_data("state")
-
-# Convert state abbreviations to full lowercase names
-state_mapping <- data.frame(
-  state = state.abb,
-  region = tolower(state.name)
-)
-
-# Filter data for after 1963 (1963 and onwards)
-data_after_1963 <- data %>%
-  filter(year >= 1963)
-
-# Aggregate cases by state for after 1963
-state_cases_after <- data_after_1963 %>%
-  group_by(state) %>%
-  summarise(total_cases = sum(number, na.rm = TRUE)) %>%
-  mutate(total_cases_millions = total_cases / 1000000)
-
-# Join data with mapping
-state_cases_after <- state_cases_after %>%
-  left_join(state_mapping, by = "state")
-
-# Join with map data
 choropleth_data_after <- states_map %>%
   left_join(state_cases_after, by = "region")
 
-# Find max value for consistent scaling
-max_cases_after <- max(state_cases_after$total_cases_millions, na.rm = TRUE)
+# Common max for shared scale
+max_common <- max(
+  state_cases_before$total_cases_millions,
+  state_cases_after$total_cases_millions,
+  na.rm = TRUE
+)
 
-# Create choropleth map for AFTER 1963 with better color contrast
-map_after <- ggplot(choropleth_data_after, aes(x = long, y = lat, group = group, fill = total_cases_millions)) +
-  geom_polygon(color = "white", size = 0.8) +
-  scale_fill_gradientn(
-    colors = c("#FFFFFF", "#FFF7E6", "#FFE5CC", "#FFD1A3", "#FFAD5C", 
-               "#FF8C42", "#FF6B2B", "#FF4500", "#E63900", "#CC3300", "#990000"),
-    name = "Total Cases\n(Millions)",
-    na.value = "grey95",
-    values = scales::rescale(c(0, 0.01, 0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 0.85, 0.95, 1)),
-    limits = c(0, max_cases_after),
-    labels = label_number(accuracy = 0.01)
-  ) +
-  labs(title = "Measles Cases in the U.S. After 1963",
-       subtitle = "Total reported cases (in millions) - Post-vaccine era") +
-  theme_void() +
+fill_scale <- scale_fill_gradientn(
+  colors = c("#FFFFFF", "#FFF7E6", "#FFE5CC", "#FFD1A3", "#FFAD5C", 
+             "#FF8C42", "#FF6B2B", "#FF4500", "#E63900", "#CC3300", "#990000"),
+  name   = "Total cases\n(Millions)",
+  na.value = "grey95",
+  values = scales::rescale(c(0, 0.01, 0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 0.85, 0.95, 1)),
+  limits = c(0, max_common),
+  labels = label_number(accuracy = 0.01),
+  guide = guide_colorbar(
+    direction     = "vertical",          # vertical legend
+    barheight     = unit(3, "cm"),
+    barwidth      = unit(0.4, "cm"),
+    title.position = "right",            # put title on the side
+    title.vjust    = 0.5                 # center along the bar
+  )
+)
+
+base_theme <- theme_void() +
   theme(
-    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
-    plot.subtitle = element_text(hjust = 0.5, size = 12),
     legend.position = "right",
-    legend.title = element_text(size = 11, face = "bold"),
-    legend.text = element_text(size = 10),
-    legend.key.height = unit(1.5, "cm"),
-    legend.key.width = unit(0.5, "cm"),
-    plot.background = element_rect(fill = "#f7f7f7", color = NA),
-    panel.background = element_rect(fill = "#f7f7f7", color = NA)
+    legend.title = element_text(
+      size = 8,
+      face = "bold",
+      angle = 90,            # rotate title so text is vertical
+      vjust = 0.5
+    ),
+    legend.text  = element_text(size = 7),
+    plot.background   = element_rect(fill = "#f7f7f7", color = NA),
+    panel.background  = element_rect(fill = "#f7f7f7", color = NA),
+    plot.title    = element_text(hjust = 0.5, size = 11, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5, size = 9)
+  )
+
+map_before <- ggplot(choropleth_data_before,
+                     aes(x = long, y = lat, group = group, fill = total_cases_millions)) +
+  geom_polygon(color = "white", linewidth = 0.3) +
+  fill_scale +
+  labs(
+    title = "Before 1963",
+    subtitle = "Pre‑vaccine era"
   ) +
-  coord_map("albers", lat0 = 39, lat1 = 45)
+  coord_map("albers", lat0 = 39, lat1 = 45) +
+  base_theme
 
-# Display the map
-print(map_after)
+map_after <- ggplot(choropleth_data_after,
+                    aes(x = long, y = lat, group = group, fill = total_cases_millions)) +
+  geom_polygon(color = "white", linewidth = 0.3) +
+  fill_scale +
+  labs(
+    title = "1963 and later",
+    subtitle = "Post‑vaccine era"
+  ) +
+  coord_map("albers", lat0 = 39, lat1 = 45) +
+  base_theme
 
-# Save the plot
-ggsave("measles_after_1963.png", plot = map_after, width = 12, height = 7, dpi = 300)
+# Side‑by‑side with shared legend
+combined <- map_before + map_after + plot_layout(ncol = 2, guides = "collect") &
+  theme(legend.position = "right")
 
-# Print summary statistics
-cat("\n=== AFTER 1963 ===\n")
-print(state_cases_after %>% arrange(desc(total_cases)))
-cat("\nTotal cases after 1963:", sum(state_cases_after$total_cases, na.rm = TRUE), "\n")
+combined
+
+# Save smaller, landscape image
+ggsave("measles_before_after_side_by_side.png",
+       plot = combined,
+       width = 5, height = 25, dpi = 300)
 
 ``` 
-
 
 ```{r}
 # Load required libraries
@@ -284,90 +219,54 @@ ggplot(heatmap_df, aes(x = year, y = loc, fill = incidence)) +
 
 ```
 ```{r}
-# Load required libraries
-library(ggplot2)
-library(dplyr)
-library(lubridate)
-library(scales)
-library(viridis)
-
-# Read the measles data
-measles_df <- read.csv("measles_data.csv")
-
-# Convert from_date to Date format
-measles_df$from_date <- as.Date(measles_df$from_date)
-
-# Extract month and assign season
-measles_df <- measles_df %>%
-  mutate(
-    month = month(from_date),
-    season = case_when(
-      month %in% c(12, 1, 2) ~ "Winter",
-      month %in% c(3, 4, 5) ~ "Spring",
-      month %in% c(6, 7, 8) ~ "Summer",
-      month %in% c(9, 10, 11) ~ "Fall"
-    )
-  )
-
-# Calculate average, median, and confidence intervals by season
-season_summary <- measles_df %>%
-  group_by(season) %>%
-  summarise(
-    avg_cases = mean(number, na.rm = TRUE),
-    median_cases = median(number, na.rm = TRUE),
-    sd_cases = sd(number, na.rm = TRUE),
-    n = n(),
-    se = sd_cases / sqrt(n),
-    ci_lower = avg_cases - 1.96 * se,
-    ci_upper = avg_cases + 1.96 * se,
-    .groups = "drop"
-  )
-
-# Set season order - FIXED: Changed "mary$season" to "season_summary$season"
-season_summary$season <- factor(season_summary$season, 
-                                levels = c("Winter", "Spring", "Summer", "Fall"))
-
-# Create sophisticated line graph with shaded confidence interval
-ggplot(season_summary, aes(x = season, y = avg_cases, group = 1)) +
-  # Add shaded confidence interval
-  geom_ribbon(aes(ymin = ci_lower, ymax = ci_upper), 
-              alpha = 0.2, fill = "steelblue") +
-  # Add line
-  geom_line(color = "#2C5F8D", size = 1.5, linetype = "solid") +
-  # Add points with larger size
-  geom_point(color = "#2C5F8D", size = 4, shape = 21, fill = "white", stroke = 2) +
-  # Add value labels above points
-  geom_text(aes(label = comma(round(avg_cases, 0))), 
-            vjust = -1.5, size = 4, fontface = "bold", color = "#2C5F8D") +
+# Beautiful bar chart of seasonal averages with 95% CI
+ggplot(season_summary, aes(x = season, y = avg_cases)) +
+  # 95% confidence interval as error bars
+  geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper),
+                width = 0.25,
+                linewidth = 0.7,
+                color = "#2C3E50") +
+  # Main bars
+  geom_col(aes(fill = season),
+           width = 0.6,
+           color = "white") +
+  # Nice color palette for seasons
+  scale_fill_viridis_d(option = "C", end = 0.9, direction = 1) +
+  # Value labels on top of bars
+  geom_text(aes(label = comma(round(avg_cases, 0))),
+            vjust = -0.5,
+            size = 3.8,
+            fontface = "bold",
+            color = "gray20") +
   labs(
     title = "Seasonal Distribution of Measles Cases",
     subtitle = "Average cases per season with 95% confidence intervals",
     x = NULL,
     y = "Average Number of Cases",
-    caption = "Shaded area represents 95% confidence interval"
+    fill = NULL,
+    caption = "Error bars show 95% confidence intervals"
   ) +
   theme_minimal(base_size = 12) +
   theme(
-    plot.title = element_text(hjust = 0.5, size = 16, face = "bold", 
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold",
                               margin = margin(b = 5)),
     plot.subtitle = element_text(hjust = 0.5, size = 11, color = "gray40",
-                                 margin = margin(b = 15)),
+                                 margin = margin(b = 10)),
     plot.caption = element_text(size = 9, color = "gray50", hjust = 0),
     axis.text.x = element_text(size = 12, face = "bold"),
     axis.text.y = element_text(size = 11),
-    axis.title.y = element_text(size = 12, face = "bold", margin = margin(r = 10)),
+    axis.title.y = element_text(size = 12, face = "bold",
+                                margin = margin(r = 10)),
     panel.grid.major.x = element_blank(),
     panel.grid.minor = element_blank(),
     panel.grid.major.y = element_line(color = "gray90", linetype = "dashed"),
-    plot.margin = margin(20, 20, 20, 20)
+    plot.margin = margin(15, 15, 15, 15),
+    legend.position = "none"
   ) +
-  scale_y_continuous(labels = comma, expand = expansion(mult = c(0.05, 0.15)))
+  scale_y_continuous(labels = comma,
+                     expand = expansion(mult = c(0.05, 0.15)))
 
-# Optional: Save the plot
-ggsave("measles_seasonal_comparison_advanced.png", width = 12, height = 7, dpi = 300)
-
-# Print detailed summary
-print(season_summary)
+ggsave("measles_seasonal_bar.png", width = 10, height = 6, dpi = 300)
 
 
 ```
