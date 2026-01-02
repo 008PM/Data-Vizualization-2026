@@ -1,7 +1,7 @@
 ---
 title: "DV_project_Dasaradha_Prashob"
 output: html_document
-Project: Version_7
+Project: Version_8
 ---
 ---------------------
 Measeles cases over Time
@@ -806,4 +806,92 @@ ggplot(city_year_top10,
     axis.text.x   = element_text(angle = 60, hjust = 1)
   )
 
+```
+
+```{r}
+# data ref : https://ourworldindata.org/grapher/measles-cases-and-death?time=1935..1990&overlay=download-data
+library(dplyr)
+library(ggplot2)
+library(scales)
+
+# Read data
+df <- read.csv("measles-cases-and-death.csv", stringsAsFactors = FALSE)
+
+df <- df %>%
+  filter(!is.na(Year),
+         !is.na(Reported.measles.cases),
+         !is.na(Measles.deaths)) %>%
+  filter(Year >= 1919, Year <= 1990) %>%
+  mutate(
+    CFR = ifelse(Reported.measles.cases > 0,
+                 Measles.deaths / Reported.measles.cases,
+                 NA_real_)
+  )
+
+p_cfr <- ggplot(df, aes(x = Year, y = CFR)) +
+  geom_line(color = "#2C3E50", linewidth = 0.8) +
+  geom_point(color = "#2C3E50", size = 1.8) +
+  geom_smooth(se = TRUE,
+              color = "#27AE60",
+              fill  = "#27AE60",
+              alpha = 0.18,
+              linewidth = 1) +
+  scale_y_continuous(labels = percent_format(accuracy = 0.01),
+                     expand  = expansion(mult = c(0, 0.05))) +
+  scale_x_continuous(breaks = seq(min(df$Year), max(df$Year), by = 5)) +
+  labs(
+    title    = "Measles case‑fatality ratio (CFR) over time – United States",
+    subtitle = "CFR = deaths / reported cases, by year",
+    x        = "Year",
+    y        = "Case‑fatality ratio"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    plot.title    = element_text(hjust = 0.5, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5, colour = "grey40"),
+    axis.text.x   = element_text(angle = 60, hjust = 1),
+    panel.grid.minor = element_blank()
+  )
+
+p_cfr
+
+```
+
+```{r}
+library(ggplot2)
+library(scales)
+library(dplyr)
+
+# Read data
+df <- read.csv("measles-cases-and-death.csv", stringsAsFactors = FALSE)
+
+df <- df %>%
+  filter(!is.na(Year),
+         !is.na(Reported.measles.cases),
+         !is.na(Measles.deaths)) %>%
+  filter(Year >= 1919, Year <= 1990)
+
+p_phase <- ggplot(df,
+                  aes(x = Reported.measles.cases,
+                      y = Measles.deaths)) +
+  geom_path(color = "#34495E", linewidth = 0.9, alpha = 0.8) +
+  geom_point(aes(color = Year), size = 2) +
+  scale_x_log10(labels = comma) +
+  scale_y_log10(labels = comma) +
+  scale_color_viridis_c(option = "C") +
+  labs(
+    title    = "Trajectory of measles in the United States",
+    subtitle = "Annual deaths vs reported cases (log–log), coloured by year",
+    x        = "Reported measles cases (log scale)",
+    y        = "Measles deaths (log scale)",
+    color    = "Year"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    plot.title    = element_text(hjust = 0.5, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5, colour = "grey40"),
+    panel.grid.minor = element_blank()
+  )
+
+p_phase
 ```
