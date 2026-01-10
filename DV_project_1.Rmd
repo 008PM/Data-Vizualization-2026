@@ -1,20 +1,27 @@
 ---
 title: "DV_project_Dasaradha_Prashob"
 output: html_document
-Project: Version_9
+Project: Version_10
 ---
 ---------------------
 Measeles cases over Time
 
 
 --------------------
-
 ```{r}
-# Load required libraries
 library(ggplot2)
 library(dplyr)
 library(lubridate)
 library(scales)
+library(maps)
+library(patchwork)
+library(viridis)
+library(ggrepel)
+```
+
+```{r}
+# Load required libraries
+
 
 # Read the CSV file
 data <- read.csv("measles_data.csv", stringsAsFactors = FALSE)
@@ -54,12 +61,7 @@ print(yearly_cases)
 Before and after 1963
 -------------------------------------------
 ```{r}
-library(ggplot2)
-library(dplyr)
-library(maps)
-library(scales)
-library(lubridate)
-library(patchwork)   # install.packages("patchwork")
+  # install.packages("patchwork")
 
 # Read data
 data <- read.csv("measles_data.csv", stringsAsFactors = FALSE)
@@ -170,9 +172,7 @@ ggsave("measles_before_after_side_by_side.png",
 
 ```{r}
 # Load required libraries
-library(ggplot2)
-library(dplyr)
-library(viridis)
+
 
 # Read the measles data
 measles_df <- read.csv("measles_data.csv")
@@ -220,11 +220,7 @@ ggplot(heatmap_df, aes(x = year, y = loc, fill = incidence)) +
 ```
 
 ```{r}
-library(ggplot2)
-library(dplyr)
-library(lubridate)
-library(scales)
-library(viridis)
+
 
 # 1. Read the measles data ---------------------------------------------------
 measles_df <- read.csv("measles_data.csv", stringsAsFactors = FALSE)
@@ -318,10 +314,7 @@ ggsave("measles_seasonal_bar.png", plot = p,
 
 ```{r}
 # Load required libraries for plotting, data manipulation, dates, and formatting
-library(ggplot2)
-library(dplyr)
-library(lubridate)
-library(scales)
+
 
 # Read the CSV file containing measles data into a data frame
 measles_df <- read.csv("measles_data.csv")
@@ -398,10 +391,7 @@ print(monthly_trend)
 ```
 ```{r}
 # Load required libraries (all standard libraries available on Linux)
-library(ggplot2)
-library(dplyr)
-library(maps)        # For US map data (usually pre-installed)
-library(viridis)     # For color schemes
+
 
 # Read the measles data
 measles_df <- read.csv("measles_data.csv")
@@ -550,10 +540,6 @@ print(summary_df %>% group_by(year) %>% summarise(total = sum(total_cases, na.rm
 
 ```{r}
 # Load required libraries
-library(ggplot2)
-library(dplyr)
-library(scales)
-library(lubridate)
 
 # Read the measles data
 measles_df <- read.csv("measles_data.csv")
@@ -670,11 +656,6 @@ print(yearly_cases)
 
 
 ```{r}
-library(dplyr)
-library(ggplot2)
-library(lubridate)
-library(scales)
-library(ggrepel)
 
 # 1. Read measles data
 measles_df <- read.csv("measles_data.csv")
@@ -741,10 +722,7 @@ ggplot(top10, aes(x = population, y = total_cases)) +
 ```
 
 ```{r}
-library(dplyr)
-library(ggplot2)
-library(lubridate)
-library(scales)
+
 
 measles_df <- read.csv("measles_data.csv")
 measles_df$from_date <- as.Date(measles_df$from_date)
@@ -780,10 +758,7 @@ ggplot(yearly, aes(x = factor(year), y = total_cases, fill = period)) +
 ```
 
 ```{r}
-library(dplyr)
-library(ggplot2)
-library(lubridate)
-library(scales)
+
 
 # 1. Read and prepare data
 measles_df <- read.csv("measles_data.csv")
@@ -855,9 +830,7 @@ ggplot(city_year_top10,
 
 ```{r}
 # data ref : https://ourworldindata.org/grapher/measles-cases-and-death?time=1935..1990&overlay=download-data
-library(dplyr)
-library(ggplot2)
-library(scales)
+
 
 # Read data
 df <- read.csv("measles-cases-and-death.csv", stringsAsFactors = FALSE)
@@ -903,9 +876,7 @@ p_cfr
 ```
 
 ```{r}
-library(ggplot2)
-library(scales)
-library(dplyr)
+
 
 # Read data
 df <- read.csv("measles-cases-and-death.csv", stringsAsFactors = FALSE)
