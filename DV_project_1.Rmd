@@ -1,13 +1,69 @@
 ---
 title: "DV_project_Dasaradha_Prashob"
 output: html_document
-Project: Version_10
+Project: Version_11
 ---
----------------------
-Measeles cases over Time
 
+# Measles Rise and Fall
 
---------------------
+![](THD.png)
+
+Submitted by:
+
+\
+Dasarath()
+
+[sanjay.parajuli\@stud.th-deg.de](mailto:sanjay.parajuli@stud.th-deg.de){.email}
+
+\
+Prashob Mathiyambath(12400279)
+
+[prashob.mathiyambath\@stud.th-deg.de](mailto:prashob.mathiyambath@stud.th-deg.de){.email}
+
+## Overview
+
+In this project, we examine the rise, fall and resurgence of measles cases and deaths in United States over the long duration of 1888 to 2014 using Project Tycho Level 2 data to analyse, visualize and interpret the complete disease progression. By combining the disease surveillance data along with vaccination coverage information from sources such as World Health Organization (WHO), Centres for Disease Control and Prevention (CDC) and other external resources such as Kaggle. We explore disease dynamics across the three distinct phases. Pre vaccine Phase (before 1963), when measles infected nearly every American child with substantial mortality. Vaccination Phase (1963-2000) showing how the disease was controlled dramatically with the introduction of vaccine in 1963 that achieved elimination status by 2000 and the Resurgence phase (2000-2014) that saw periodic outbreaks due to the decline in vaccination rates and localized clusters of unvaccinated people. By using spatial, temporal analysis of trends and corelation with the intervention programs we demonstrate both the remarkable success of vaccination programs and the vulnerability of disease elimination, when there is a reduced immunization coverage.
+
+\
+
+## 1.Introduction
+
+According to WHO, health comprises complete physical, mental and social well-being, not merely the absence of disease. Throughout the history of United States, measles has been one of the most significant public health challenges, representing historical progression trends from endemic disease to elimination and back to localized outbreaks. Before the availability of vaccine, measles was infecting approximately 95 percent of the US population by age 15 and an annual average of 3-4 million cases and 400-500 deaths. With the development of the first measles vaccine in 1963 has transformed the disease landscape dramatically. Reported cases dropped by more than 97 percent between 1965 and 1968, demonstrating vaccination’s immediate impact. However, the outbreak again in 1990 among school children, revealing gaps in vaccine coverage, which led to the introduction of two dose MMR recommendation that finally achieved elimination status by the year 2000.
+
+Despite this achievement, measles has never completely disappeared from the US. After 2000, it has witnessed periodic outbreaks, in 2008 and 2014-2015. These resurgence cases occur when local vaccination rates affect the herd immunity. In this project, we utilize the Project Tycho Level 2 Dataset, a comprehensive repository of disease surveillance data developed by University of Pittsburgh. It compiles historical disease reports covering more than a century of public health surveillance across all states and over 100 cities in United States. The Level 2 dataset also provides standardized weekly counts of measles cases and deaths from 1888 to 2014. This rich historical dataset enables us to visualize the complete disease progression trajectory of measles in an unprecedented detail. By integrating external vaccination coverage data from WHO and Kaggle with Tycho Level 2 data, our goal is to comprehensively document how measles evolved from a universal childhood disease to a nearly eliminated infection and how decline in vaccination threatens this progress. Through statistical analysis and data visualization, we aim to demonstrate the direct relationship between public health interventions and disease control, while highlighting the ongoing importance of maintaining high vaccination coverage to prevent resurgence.
+
+## 2.Problem definition:
+
+Understanding the historical patterns of vaccine preventable diseases is crucial for public health decision making and communication. Although Project Tycho Level 2 data provides extensive weekly measles reports from 1888 to 2014, the size of the dataset and complexity makes it difficult to interpret and understand the trends without proper visualization tools. Comprehensive analysis that demonstrates how measles burden changed across various phases are lacking. Many important aspects remain inadequately addressed, including how measles cases and deaths evolved before and after vaccine introduction in 1963, which states and regions experienced the highest disease burden during each phase, what specific impact vaccination programs and policy interventions had on disease trends, and how after elimination outbreaks correlate with geographic clusters of low vaccination coverage. Additionally, the seasonal and temporal patterns that characterized measles transmission across different eras remain poorly documented. These insights are hidden without clear visualizations, hindering our ability to communicate the importance of sustained vaccination coverage and the risks of vaccine hesitancy. By systematically analysing and visualizing the data, we aim to bridge that gap, reveal the complete trends of measles, and support evidence based public health communication.
+
+## 3.Objectives:
+
+The purpose of our analysis is to investigate the spatial, temporal, and intervention based trends of measles across the United States from 1888 to 2014. Our study aims to uncover the complete disease patterns of measles, demonstrating the impact of vaccination programs and enabling improved public health communication. The following are the key objectives:
+
+1.  Characterise national measles trends over time: Aggregate reported measles cases by year to produce clear time‑series visualisations, identify major epidemic peaks and long term declines and highlight the timing of key milestones such as vaccine introduction and elimination efforts.
+
+2.  Compare pre‑ and post‑vaccine periods: Quantify and visualise differences in national measles burden before and after 1963, using focused time windows around vaccine introduction to show how case counts changed during the transition from endemic transmission to control.​
+
+3.  Describe spatial heterogeneity across states: Use choropleth maps and faceted map panels to visualise state level measles burden in different eras, emphasising which regions carried the largest burden and how spatial patterns evolved between the 1950s and 1990s.
+
+4.  Investigate temporal patterns by state using heatmaps: Construct a heatmap for the top twenty states by cumulative measles incidence to reveal persistent hotspots, periods of intense activity.
+
+5.  Analyse seasonality and monthly patterns: Summarise measles cases by season and by calendar month across all years and visualise these aggregations using bar charts with confidence intervals and circular polar plots, to understand when within the year measles peaks most consistently occur.
+
+6.  Explore city level burden and anomalies: Relate measles burden in major U.S. cities to their population size using log–log scatterplots, and identify anomalous years in a selected city by computing z‑scores for annual case counts over a defined time window.
+
+7.  Assess severity using deaths and case‑fatality ratios: Combine annual case and death counts to compute a case‑fatality ratio over time, and visualise both CFR trends and the joint trajectory of deaths versus cases to assess how the severity of measles evolved as control measures improved.
+
+8.  Demonstrate reproducible data visualisation practice. Implement all data preparation and plotting steps in a transparent, reproducible R Markdown document, ensuring that each figure is directly linked to code and that the workflow can be extended to related datasets or diseases.
+
+By meeting these objectives, the analysis offers insights into measles epidemiology across all three phases and demonstrates both the success of vaccination programs and the vulnerability of elimination status when immunization coverage declines.
+
+## 4.Methods
+
+## 5.Results
+
+## 5.1 Historical Analysis 1900–2000
+
 ```{r}
 library(ggplot2)
 library(dplyr)
@@ -57,9 +113,14 @@ print(yearly_cases)
 
 ```
 
--------------------------------------------
-Before and after 1963
--------------------------------------------
+Fig 1 – Annual measles cases (1900–2000) The annual measles time series from 1900 to 2000 reveals three distinct phases in the disease trajectory in the United States. Before vaccine introduction in 1963, reported measles incidence remained persistently high, with many years exceeding hundreds of thousands to more than a million cases, reflecting sustained endemic transmission in a largely susceptible population. These early decades are characterised by large, recurrent epidemic peaks and only brief, shallow troughs, indicating that measles circulated efficiently and rapidly replenished its new infections.
+
+Following the introduction of measles vaccination in 1963, the curve shows a sharp and sustained decline, with annual case counts dropping by orders of magnitude over the subsequent decades. This steep downward trend illustrates the impact of increasing vaccine coverage and the gradual interruption of widespread transmission chains, as fewer susceptible individuals remained available to fuel large outbreaks. By the late 1990s, the time series approaches zero, marking the elimination phase when endemic circulation was interrupted and most reported cases were sporadic or imported.
+
+The tail of the time series nonetheless highlights a minor resurgence phase, with small but distinct spikes around the late 1980s and early 1990s. These localised outbreaks, occurring against a backdrop of very low national incidence, demonstrate that even in the elimination era, pockets of under‑immunised individuals or lapses in coverage can allow measles to re‑emerge. Overall, Fig 1 summarises the transition from a pre‑vaccine era of large, regular epidemics to a post‑vaccine era of greatly reduced incidence punctuated by occasional resurgences when vaccination gaps appeared.​
+
+## 5.2 Pre and Post vaccination Era.
+
 ```{r}
   # install.packages("patchwork")
 
@@ -168,7 +229,13 @@ ggsave("measles_before_after_side_by_side.png",
        plot = combined,
        width = 5, height = 25, dpi = 300)
 
-``` 
+```
+
+Fig 2 – State‑level burden before and after 1963 The choropleth map in Fig 2 displays the total number of measles cases recorded in each U.S. state before 1963, providing a spatial perspective on the pre‑vaccine disease burden. Several states show cumulative totals in the order of millions of cases, and large contiguous regions appear in the darkest shades of the colour scale, indicating very high historical incidence. This pattern underscores how widespread and intense measles transmission was in the pre‑vaccine era, particularly in highly populated states and those with major urban centres where high population facilitated spread of infection.​
+
+In contrast, Fig 3 shows cumulative measles cases for the period after 1963, using the same or a comparable colour scale to allow direct visual comparison. Here, the overall intensity is dramatically reduced, states that previously recorded totals above two million cases now fall into much lighter bands, often with cumulative counts reduced by more than an order of magnitude into the range of tens to a few hundred thousand. Large areas of the map appear in the lightest colours, indicating that many states recorded relatively few cases over the entire post‑vaccine period compared with their pre‑vaccine history.​
+
+Taken together, these two maps clearly visualise the impact of vaccination at the spatial level. They show that the reduction in measles burden was not confined to a few states but occurred across the country, albeit with some variation in the magnitude of decline. States that had been among the highest‑burden regions before 1963 still tend to have relatively higher totals afterwards, but the absolute numbers are much smaller, reflecting both the effectiveness of the vaccine and the importance of sustained nationwide coverage.​
 
 ```{r}
 # Load required libraries
@@ -218,6 +285,12 @@ ggplot(heatmap_df, aes(x = year, y = loc, fill = incidence)) +
 # ggsave("measles_heatmap_top20.png", width = 12, height = 10, units = "in", dpi = 300)
 
 ```
+
+Fig 3– Heatmap of top 20 states (1950–1980) The heatmap in Fig 4 focuses on the top 20 U.S. states with the highest cumulative measles incidence between 1950 and 1980 and visualises their yearly case counts over this period. Each cell represents the number of measles cases in a particular state and year, with a colour gradient running from light shades for low counts to dark shades for very high counts. This design allows temporal trends and cross‑state differences to be examined simultaneously in a compact format.​
+
+For most of the top 20 states, rows corresponding to the early 1950s and early 1960s contain multiple dark cells, reflecting repeated years of high measles incidence before widespread vaccination. These states often show contiguous blocks of high intensity, indicating that high transmission was sustained over consecutive years rather than being restricted to isolated spikes. Around the mid‑1960s, particularly after 1963, there is a conspicuous shift toward lighter colours across many states, signalling a substantial reduction in annual case counts.​
+
+The heatmap thus makes the timing and magnitude of change very clear: a broad band of dark shades in the pre‑vaccine and very early post‑vaccine years is followed by mostly lighter shades as measles is progressively brought under control. This pattern supports the interpretation that vaccination did not just reduce national totals but also lowered incidence in traditionally high‑burden states to levels that would have been atypically low in the pre‑vaccine era. The figure also helps identify states that remained relatively high‑burden for longer or experienced late declines, which could be linked to differences in population size, local policies or vaccine uptake.​
 
 ```{r}
 
@@ -309,8 +382,13 @@ ggsave("measles_seasonal_bar.png", plot = p,
        width = 10, height = 6, dpi = 300)
 ```
 
+Fig 4 – Seasonal distribution of measles cases
 
+Fig 4 summarises the distribution of measles cases across the four meteorological seasons winter, spring, summer and fall aggregated over the study period. The plot shows that spring has the highest average number of cases, followed by winter, with summer considerably lower and fall having the lowest burden of the four seasons. This ranking is robust across the period analysed, indicating a consistent seasonal pattern in measles transmission.
 
+The prominence of spring suggests that measles tends to peak in late winter and early spring, a pattern consistent with school‑driven mixing and environmental factors that favour respiratory virus transmission. Winter, which precedes spring, also shows elevated average counts, reflecting the build‑up of cases leading into the main seasonal peak. By contrast, summer and fall have markedly lower average counts, implying that transmission slows when schools are closed or when contact patterns change, reducing effective contact rates.​
+
+By aggregating over many years, this figure demonstrates that seasonal forcing is a persistent feature of measles epidemiology rather than a transient or period‑specific phenomenon. The clear dominance of spring cases has important implications for the timing of vaccination and outbreak preparedness, since it indicates when healthcare systems and public‑health authorities are likely to face the greatest pressure from measles admissions and control activities.​
 
 ```{r}
 # Load required libraries for plotting, data manipulation, dates, and formatting
@@ -389,6 +467,13 @@ ggsave("measles_seasonal_polar_gradient.png",
 print(monthly_trend)
 
 ```
+
+Fig 5 – Monthly pattern of measles incidence This figure provides a more granular view of seasonality by plotting total measles cases for each calendar month, from January to December, across all years. In this visual, months are arranged around the circle and represented by bars whose height and colour intensity reflect the total number of cases recorded in that month over the entire dataset. The resulting pattern shows that March, April and May have the highest totals, forming a clear cluster of peak months in late winter and spring.​
+
+These months correspond exactly to the season that had the highest burden in Fig 5, but Fig 6 pinpoints the specific months within spring that carry most of the measles load. The fact that March, April and May stand out so distinctly suggests that measles outbreaks often accelerate in late winter, peak during early to mid‑spring and then decline as summer approaches. Months in summer and fall, such as July, August or October, show much lower totals, which visually appear as shorter, lighter bars on the plot.​
+
+By combining circular layout with a continuous colour gradient, this figure reinforces the notion of measles as a seasonally patterned disease with a strong and recurring spring peak. It also illustrates how the monthly distribution of cases is tightly concentrated in a few months, which helps explain why annual and seasonal aggregates are so dominated by the behaviour of late winter and spring. For public‑health planning, this kind of monthly profile is particularly useful for scheduling interventions, anticipating healthcare demand and interpreting surveillance signals in different parts of the year.​
+
 ```{r}
 # Load required libraries (all standard libraries available on Linux)
 
@@ -538,6 +623,12 @@ for (yr in key_years) {
 print(summary_df %>% group_by(year) %>% summarise(total = sum(total_cases, na.rm = TRUE)))
 ```
 
+Fig 6 – Snapshot maps every 5 years (1950–1990)
+
+Fig 6 presents faceted choropleth maps of measles cases by state for selected years between 1950 and 1990, with one map every five years. In the early panels (1950s and early 1960s), many states appear in dark shades, indicating widespread high incidence in the pre‑vaccine era.
+
+As the panels progress into the late 1960s and 1970s, the maps become progressively lighter, reflecting the substantial national decline in measles following vaccine introduction and scale‑up. By the 1980s, most states show only low levels of reported cases, and the absence of large dark clusters illustrates how widespread transmission was gradually interrupted, even though isolated pockets of higher incidence still appear in some years.​
+
 ```{r}
 # Load required libraries
 
@@ -654,6 +745,11 @@ print(yearly_cases)
 
 ```
 
+Fig 7 – Measles cases 1960–2000 with vaccine and resurgence markers
+
+Fig 7 shows annual measles cases from 1960 to 2000 with key public‑health milestones marked on the time axis. The dashed line at 1963 indicates vaccine licensure and is followed by a steep decline in yearly case counts, demonstrating the immediate impact of vaccination on national burden. A second marker around the elimination goal year points to the period when sustained interruption of endemic transmission became an explicit objective.
+
+Despite the overall downward trend, the shaded region and highlighted points around 1989–1991 reveal a clear resurgence, where cases temporarily increased again, emphasising that even in the vaccine era, immunity gaps or drops in coverage can lead to substantial outbreaks.​
 
 ```{r}
 
@@ -721,6 +817,12 @@ ggplot(top10, aes(x = population, y = total_cases)) +
 
 ```
 
+Fig 8 – Measles burden vs city population (top 10 cities)
+
+Fig 8 plots total measles cases from 1950–1990 against city population for the ten largest U.S. cities on log–log axes, with a fitted regression line summarising the overall relationship. Most cities lie close to this line, indicating that larger populations are associated with greater cumulative measles burden, consistent with higher contact rates and a larger pool of susceptibles sustaining repeated outbreaks.
+
+Cities that appear above the line experienced more measles than expected for their size, suggesting denser transmission conditions or lower effective vaccination coverage, whereas those below the line had fewer cases than predicted, potentially reflecting better control or differences in surveillance.​
+
 ```{r}
 
 
@@ -756,6 +858,12 @@ ggplot(yearly, aes(x = factor(year), y = total_cases, fill = period)) +
     legend.position = "top"
   )
 ```
+
+Fig 9 – Measles cases 10 years before and after vaccine introduction
+
+Fig 9 compares annual measles cases in a 20‑year window spanning ten years before and ten years after the 1963 vaccine introduction, with years coloured as pre‑ or post‑vaccine. In the pre‑vaccine decade, most bars are high, reflecting large, recurring epidemics and indicating that measles remained fully endemic during this period.
+
+In the decade after 1963, bar heights drop sharply overall, showing that reported cases fell by roughly an order of magnitude in many years as vaccination coverage rose and transmission was curtailed. The remaining relatively tall bars in some post‑vaccine years highlight that residual transmission and occasional spikes still occurred until high coverage and consistent control measures were firmly established.​
 
 ```{r}
 
@@ -828,6 +936,12 @@ ggplot(city_year_top10,
 
 ```
 
+Fig 10 – Most anomalous measles years in a single city (z‑scores)
+
+Fig 10 displays the ten most anomalous measles years for a selected city over a 20‑year window, using z‑scores of annual case counts to standardise against that city’s own history. Each bar represents a year’s z‑score, and years with z ≥ 2 are highlighted as strong anomalies, indicating incidence more than two standard deviations above the long‑term mean.
+
+The concentration of high z‑score bars in specific periods suggests that localised outbreaks or conditions favouring transmission occurred in particular years, standing out clearly from the city’s usual fluctuation and signalling years that warrant closer epidemiological scrutiny.​
+
 ```{r}
 # data ref : https://ourworldindata.org/grapher/measles-cases-and-death?time=1935..1990&overlay=download-data
 
@@ -875,6 +989,10 @@ p_cfr
 
 ```
 
+Fig 11 – Measles case‑fatality ratio (CFR) over time Fig 11 shows the annual measles case‑fatality ratio in the United States, calculated as deaths divided by reported cases and plotted with a smoothed trend. The overall downward trajectory indicates that, over the decades, the risk of dying given a reported measles infection substantially decreased, reflecting improvements in clinical care, nutrition, general living conditions and possibly surveillance sensitivity.
+
+Short‑term fluctuations and minor peaks in the CFR curve suggest periods in which severity briefly worsened or reporting changed, but these are superimposed on a clear long‑term decline, illustrating how measles became progressively less lethal even as incidence itself was falling due to vaccination.​
+
 ```{r}
 
 
@@ -910,4 +1028,61 @@ p_phase <- ggplot(df,
   )
 
 p_phase
+```
+
+Fig 12 plots annual measles deaths against reported cases on log–log axes, connecting points in chronological order and colouring them by year to show the trajectory through time. Early years cluster in the upper‑right part of the plot, where both case counts and deaths are high, representing the pre‑vaccine era of frequent, severe epidemics.
+
+Over subsequent decades, the trajectory moves steadily towards the lower‑left, indicating simultaneous declines in incidence and mortality as vaccination, healthcare and living conditions improved. Sections where the path drops more vertically suggest reductions in deaths faster than in cases (declining severity), while segments slanting diagonally downwards show periods of comprehensive progress in reducing both measles cases and deaths in the United States.​
+
+## 6.Discussion and limitations
+
+The combination of temporal, spatial, seasonal and severity analysis presented in this project offers a comprehensive view of measles dynamics in the United States. National time series and pre and post vaccine comparisons confirm that measles burden declined dramatically after vaccination, although the presence of resurgences illustrates that high coverage and sustained public‑health efforts were necessary to move from control to elimination.​ State‑level maps and heatmaps demonstrate marked spatial heterogeneity in measles burden. States with large populations and major urban centres consistently show higher incidence, reflecting both demographic factors and the role of dense contact networks in sustaining transmission. The changes observed between pre‑ and post‑vaccine maps suggest that vaccination efforts reduced burden across the country but did not erase underlying geographic differences.​ Seasonal and monthly analyses highlight strong within‑year structure, with clear peak seasons in which average case counts are substantially higher than in quieter periods. These patterns are consistent with known drivers of measles seasonality, such as school terms and environmental conditions, and underscore why timing of vaccination campaigns matters for outbreak prevention.​ City‑level analyses indicate a positive relationship between city size and measles burden, as expected for a directly transmitted infection with higher opportunities for contact in larger populations. The z‑score‑based anomaly detection approach provides a simple but effective way to flag years of exceptional activity in specific cities, which could reflect local outbreaks, changes in reporting or special events.​ Severity analyses based on deaths and CFR suggest an overall decline in the risk of death given a reported case over time, reflecting improvements in health care and general living conditions alongside vaccination. The log–log trajectory of deaths versus cases provides a compact visual summary of this shift, showing how the combined burden moved towards lower incidence and mortality.​ Several limitations should be kept in mind when interpreting these results. First, the analyses are descriptive and do not incorporate mechanistic modelling or adjustment for confounders such as population growth, age structure or vaccination coverage levels. Second, the datasets reflect reported cases and deaths, which may be subject to under‑reporting, misclassification and changes in surveillance practices over time. Third, city population figures are approximate snapshots and do not capture changes in population size over the entire analysis period.​ Despite these limitations, the project demonstrates how thoughtfully designed visualisations can transform complex historical surveillance data into accessible insights. The R Markdown workflow ensures that all figures are directly linked to code and can be updated or extended as needed, making this a flexible template for similar analyses of other infectious diseases.​
+
+## 7.Conclusion
+
+This project applied a broad range of data‑visualisation techniques to historical measles data from the United States to explore temporal trends, spatial patterns, seasonal structure and severity. By aggregating and transforming the data at multiple scales and presenting them through time‑series plots, maps, heatmaps, circular charts and log–log trajectories, the analysis built a coherent narrative of measles dynamics in the pre‑ and post‑vaccine eras.​ The findings emphasise the profound impact of vaccination on measles burden while illustrating that control and elimination required sustained efforts beyond initial vaccine introduction. They also show that spatial heterogeneity, strong seasonality and variation in severity are important features of measles epidemiology that can be effectively communicated through appropriate visualisations.​
+
+## Literature
+
+```         
+1. van Panhuis WG, Grefenstette J, Jung SY, et al. Contagious Diseases in the United States from 1888 to the Present. New England Journal of Medicine. 2013;369(22):2152-2158. doi:10.1056/NEJMms1215400
+
+2. Project Tycho Level 2 data: Counts of multiple diseases reported in UNITED STATES OF AMERICA, 1888-2014. Zenodo. 2024. doi:10.5281/zenodo.12608994
+
+3. Majumder MS, Cohn EL, Mekaru SR, Huston JE, Brownstein JS. Project Tycho 2.0: a repository to improve the integration and reuse of data for global population health. Journal of the American Medical Informatics Association. 2018;25(12):1608-1617. doi:10.1093/jamia/ocy121
+
+4. Conis E. Measles and the Modern History of Vaccination. Public Health Reports. 2019;134(2):118-125. doi:10.1177/0033354918825154
+
+5. Centers for Disease Control and Prevention. History of Measles.
+Updated May 19, 2024. Accessed November 2, 2025. https://www.cdc.gov/measles/about/history.html
+
+6. Patel M, Lee AD, Redd SB, et al. Increase in Measles Cases — United States, January 1–April 26, 2019. MMWR Morbidity and Mortality Weekly Report. 2019;68(17):402-404.
+
+7. Hinman AR, Orenstein WA, Bloch AB, et al. Impact of measles in the United States. Reviews of Infectious Diseases. 1983;5(3):439-444. doi:10.1093/clinids/5.3.439
+
+8. Orenstein WA, Papania M, Wharton ME. Measles elimination in the United States. Journal of Infectious Diseases. 2004;189(Suppl 1):S1-S3. doi:10.1086/377693
+
+9. Gastañaduy PA, Budd J, Fisher N, et al. A Measles Outbreak in an Underimmunized Amish Community in Ohio. New England Journal of Medicine. 2016;375:1343-1354. doi:10.1056/NEJMoa1602295
+
+10. Clemmons NS, Gastanaduy PA, Fiebelkorn AP, Redd SB, Wallace GS. Measles — United States, January 4–April 2, 2015. MMWR Morbidity and Mortality Weekly Report. 2015;64(14):373-376.
+
+11. Zipprich J, Winter K, Hacker J, Xia D, Watt J, Harriman K. Measles Outbreak — California, December 2014–February 2015. MMWR Morbidity and Mortality Weekly Report. 2015;64(6):153-154.
+
+12. Parker Fiebelkorn A, Redd SB, Gallagher K, et al. Measles in the United States during the Postelimination Era. Journal of Infectious Diseases. 2010;202(10):1520-1528. doi:10.1086/656914
+
+13. Phadke VK, Bednarczyk RA, Salmon DA, Omer SB. Association Between Vaccine Refusal and Vaccine-Preventable Diseases in the United States: A Review of Measles and Pertussis. JAMA. 2016;315(11):1149-1158. doi:10.1001/jama.2016.1353
+
+14. Enders JF, Peebles TC. Propagation in tissue cultures of cytopathogenic agents from patients with measles. Proceedings of the Society for Experimental Biology and Medicine. 1954;86(2):277-286.
+
+15. Hilleman MR, Buynak EB, Weibel RE, Stokes J Jr. Live, attenuated measles vaccine. JAMA. 1968;206(3):587-590.
+
+16. World Health Organization. Measles vaccines: WHO position paper – April 2017. Weekly Epidemiological Record. 2017;92(17):205-228.
+
+17. Atwood A. The long-term effects of measles vaccination on earnings and employment. American Economic Journal: Economic Policy. 2022;14(1):34-60.
+
+18. History of Vaccines. Measles Timeline. College of Physicians of Philadelphia. Accessed November 2, 2025. https://historyofvaccines.org/history/measles/timeline/
+
+19. Infectious Diseases Society of America. Measles vaccination: Know the facts. Updated December 31, 2023. Accessed November 2, 2025.
+
+20. Roush SW, Murphy TV. Historical comparisons of morbidity and mortality for vaccine-preventable diseases in the United States. JAMA. 2007;298(18):2155-2163. doi:10.1001/jama.298.18.2155
 ```
