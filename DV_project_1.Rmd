@@ -1,9 +1,9 @@
 ---
 title: "DV_project_Dasaradha_Prashob"
 output:
-  pdf_document: default
   html_document: default
-Project: Version_14
+  pdf_document: default
+Project: Version_15
 ---
 
 # Mapping a Century of Measles: Time, Space, Seasonality, and Severity in the United States
@@ -24,7 +24,7 @@ Prashob Mathiyambath(12400279)
 
 ## Overview {#overview}
 
-In this project, we examine the rise, fall and resurgence of measles cases and deaths in United States over the long duration of 1888 to 2014 using Project Tycho Level 2 data to analyse, visualize and interpret the complete disease progression. By combining the disease surveillance data along with vaccination coverage information from sources such as World Health Organization (WHO), Centers for Disease Control and Prevention (CDC) and other external resources such as Kaggle. We explore disease dynamics across the three distinct phases.
+In this project, we examine the rise, fall and resurgence of measles cases and deaths in United States over the long duration of 1888 to 2014 using Project Tycho Level 2 data to analyse, visualize and interpret the complete disease progression. By combining the disease surveillance data along with US mortality dataset we explore disease dynamics across the three distinct phases.
 
 Pre vaccine Phase (before 1963), when measles infected nearly every American child with substantial mortality. Vaccination Phase (1963-2000) showing how the disease was controlled dramatically with the introduction of vaccine in 1963 that achieved elimination status by 2000 and the Resurgence phase (2000-2014) that saw periodic outbreaks due to the decline in vaccination rates and localized clusters of vaccinated people. By using spatial,temporal analysis of trends and correlation with the intervention programs we demonstrate both the remarkable success of vaccination programs and the vulnerability of disease elimination, when there is a reduced immunization coverage.
 
@@ -86,13 +86,13 @@ This project uses two data-sets:
 
 ## 4.1.Data selection and objective framing
 
-Data were filtered to the relevant years/locations to align with questions about temporal trends, seasonality, and geographic burden.​
+Data were filtered to the relevant years or locations to align with questions about temporal trends, seasonality, and geographic burden.​
 
 ## 4.2.Data analysis and visualization
 
-Data wrangling was performed using dplyr/tidyverse verbs (e.g., `filter`, `group_by`, `summarise`, `mutate`, `join`) and date handling with lubridate where needed.​
+Data wrangling was performed using dplyr or tidyverse verbs (e.g., `filter`, `group_by`, `summarise`, `mutate`, `join`) and date handling with lubridate where needed.​
 
-## 4.3.Visual outputs (libraries - chart - purpose)
+## 4.3.Visual outputs (libraries , charts , purpose)
 
 **Measles cases over time** : Libraries: ggplot2, dplyr, lubridate, scales (+ base R). Chart: line chart.Purpose: show the long-run trend in yearly measles incidence.​
 
@@ -106,7 +106,7 @@ Data wrangling was performed using dplyr/tidyverse verbs (e.g., `filter`, `group
 
 **Measles by state over time (1950–1990)** :Libraries: ggplot2, dplyr, maps. Chart: faceted choropleth maps (snapshots) and/or single-year choropleths. Purpose: visualize how spatial patterns change across decades.​
 
-**Resurgence annotated trend (1960–2000)** : Libraries: ggplot2, dplyr, lubridate, scales. Chart: annotated time-series line/area chart. Purpose: highlight vaccine introduction, elimination goals, and the 1989–1991 resurgence period.​
+**Resurgence annotated trend (1960–2000)** : Libraries: ggplot2, dplyr, lubridate, scales. Chart: annotated time-series line or area chart. Purpose: highlight vaccine introduction, elimination goals, and the 1989–1991 resurgence period.​
 
 **Measles burden vs city size** :Libraries: ggplot2, dplyr, tibble, scales, lubridate, ggrepel. Chart: log–log scatter plot with fitted line. Purpose: assess how total cases scale with population among the largest cities.​
 
@@ -116,7 +116,7 @@ Data wrangling was performed using dplyr/tidyverse verbs (e.g., `filter`, `group
 
 **Measles CFR over time (1919–1990)** : Libraries: ggplot2, dplyr, scales. Chart: time-series line chart with smoothing. Purpose: show changes in case-fatality ratio across time.​
 
-**Trajectory of measles (deaths vs cases)** : Libraries: ggplot2, dplyr, scales, viridis. Chart: log–log phase-space scatter/trajectory with year color gradient. Purpose: show how deaths and cases jointly evolved over time.​
+**Trajectory of measles (deaths vs cases)** : Libraries: ggplot2, dplyr, scales, viridis. Chart: log–log phase-space scatter or trajectory with year color gradient. Purpose: show how deaths and cases jointly evolved over time.​
 
 ## 5.Results {#results}
 
@@ -161,7 +161,6 @@ ggplot(yearly_cases, aes(x = year, y = total_cases_millions)) +
         axis.text = element_text(size = 10),
         axis.title = element_text(size = 12))
 
-# Optional: Save the plot
 ggsave("measles_cases_by_year.png", width = 10, height = 6, dpi = 300)
 
 # Print summary statistics
@@ -176,7 +175,6 @@ The annual measles time series from 1900 to 2000 reveals three distinct phases i
 ## 5.2 Pre and Post vaccination Era.
 
 ```{r}
-  # install.packages("patchwork")
 
 # Read data
 data <- read.csv("measles_data.csv", stringsAsFactors = FALSE)
@@ -331,8 +329,6 @@ ggplot(heatmap_df, aes(x = year, y = loc, fill = incidence)) +
   theme_minimal(base_size = 13) +
   theme(axis.text.y = element_text(size = 7))
 
-# To save with adjusted vertical space for 20 states:
-# ggsave("measles_heatmap_top20.png", width = 12, height = 10, units = "in", dpi = 300)
 
 ```
 
@@ -342,13 +338,13 @@ This heat map focuses on the top 20 US states with the highest cumulative measle
 
 ```{r}
 
-# 1. Read the measles data --------------
+# 1. Readomg the measles data 
 measles_df <- read.csv("measles_data.csv", stringsAsFactors = FALSE)
 
-# Ensure date column is Date
+# Ensuring date column is Date
 measles_df$from_date <- as.Date(measles_df$from_date)
 
-# 2. Create month and season -----------------
+# 2. Create month and season 
 measles_df <- measles_df %>%
   mutate(
     month = month(from_date),
@@ -360,7 +356,7 @@ measles_df <- measles_df %>%
     )
   )
 
-# 3. Build season_summary with mean, SD, SE, CI ------------------------------
+# 3. Building season_summary with mean, SD, SE, CI 
 season_summary <- measles_df %>%
   group_by(season) %>%
   summarise(
@@ -380,7 +376,7 @@ season_summary$season <- factor(
   levels = c("Winter", "Spring", "Summer", "Fall")
 )
 
-# 4. Beautiful bar chart of seasonal averages with 95% CI --------------------
+# 4 bar chart of seasonal averages with 95% CI 
 p <- ggplot(season_summary, aes(x = season, y = avg_cases)) +
   geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper),
                 width = 0.25,
@@ -441,10 +437,10 @@ measles_df <- read.csv("measles_data.csv")
 # Convert the 'from_date' column from text/character format to actual Date objects
 measles_df$from_date <- as.Date(measles_df$from_date)
 
-# Extract month number (1-12) from the date and add it as a new column
+# Extracting month number (1-12) from the date and add it as a new column
 measles_df$month <- month(measles_df$from_date)
 
-# Calculate total cases for each month across all years
+# Calculating total cases for each month across all years
 monthly_trend <- measles_df %>%
   # Remove any rows where month is missing (NA values)
   dplyr::filter(!is.na(month)) %>%
@@ -454,7 +450,7 @@ monthly_trend <- measles_df %>%
   summarise(total_cases = sum(number, na.rm = TRUE), .groups = "drop")
 
 
-# Create an enhanced version with color gradient based on case counts
+# Creating an enhanced version with color gradient based on case counts
 ggplot(monthly_trend, aes(x = factor(month), y = total_cases, fill = total_cases)) +
   # Create bars with fill color varying by case count
   geom_bar(stat = "identity",           # Use actual y values
@@ -498,13 +494,13 @@ ggplot(monthly_trend, aes(x = factor(month), y = total_cases, fill = total_cases
   # Format y-axis with commas
   scale_y_continuous(labels = comma)
 
-# Save the enhanced polar chart
+# Saveing the polar chart
 ggsave("measles_seasonal_polar_gradient.png", 
        width = 11,        # Slightly wider for legend
        height = 11,       # Square dimensions
        dpi = 300)         # High resolution
 
-# Print monthly statistics
+# Printing monthly statistics
 print(monthly_trend)
 
 ```
@@ -598,7 +594,7 @@ ggplot(data = filter(map_df_complete, year %in% selected_years)) +
     panel.grid = element_blank()
   )
 
-# Save the faceted map
+# Saving the map
 ggsave("measles_map_faceted.png", width = 14, height = 12, dpi = 300)
 
 ```
@@ -620,9 +616,9 @@ measles_df$year <- year(measles_df$from_date)
 
 # Aggregate cases by year for the period 1960-2000
 yearly_cases <- measles_df %>%
-  filter(year >= 1960 & year <= 2000) %>%             # Filter years 1960-2000
-  group_by(year) %>%                                   # Group by year
-  summarise(total_cases = sum(number, na.rm = TRUE),  # Sum all cases per year
+  filter(year >= 1960 & year <= 2000) %>%             
+  group_by(year) %>%                                   
+  summarise(total_cases = sum(number, na.rm = TRUE), 
             .groups = "drop")
 
 # Find the max value for positioning
@@ -639,7 +635,7 @@ ggplot(yearly_cases, aes(x = year, y = total_cases)) +
   # Vaccine introduction marker (1963)
   geom_vline(xintercept = 1963,                        
              linetype = "dashed",                      
-             color = "#27AE60",                        # Green for vaccine
+             color = "#27AE60",                       
              size = 0.8,                               
              alpha = 0.7) +                            
   annotate("text",                                     
@@ -648,12 +644,12 @@ ggplot(yearly_cases, aes(x = year, y = total_cases)) +
            size = 3.5,                                 
            color = "#27AE60",                          
            fontface = "bold",
-           angle = 90,                                 # Vertical text
+           angle = 90,                                
            vjust = -0.5) +                             
   # Elimination goal marker (1978)
   geom_vline(xintercept = 1978,                        
              linetype = "dashed",                      
-             color = "#3498DB",                        # Blue for goal
+             color = "#3498DB",                        
              size = 0.8,                               
              alpha = 0.7) +                            
   annotate("text",                                     
@@ -692,8 +688,8 @@ ggplot(yearly_cases, aes(x = year, y = total_cases)) +
   # Minimal labels
   labs(
     title = "Measles Cases (1960–2000)",
-    x = NULL,                                          # Remove x-axis label
-    y = "Cases"                                        # Short y-axis label
+    x = NULL,                                         
+    y = "Cases"                                        
   ) +
   # Clean minimal theme
   theme_minimal(base_size = 11) +
@@ -707,9 +703,9 @@ ggplot(yearly_cases, aes(x = year, y = total_cases)) +
                                 margin = margin(r = 10)),
     axis.text = element_text(size = 10),
     panel.grid.minor = element_blank(),                
-    panel.grid.major.x = element_blank(),              # Remove vertical grid
+    panel.grid.major.x = element_blank(),              
     panel.grid.major.y = element_line(color = "gray92",
-                                      size = 0.3),     # Subtle horizontal grid
+                                      size = 0.3),     
     plot.margin = margin(15, 15, 15, 15)               
   )
 
@@ -855,8 +851,8 @@ measles_df$loc       <- toupper(measles_df$loc)
 
 # 2. Choose 20-year window and a single city
 start_year <- 1950
-end_year   <- 1969          # 20 years: 1950–1969
-target_city <- "NEW YORK"   # change to the city you want
+end_year   <- 1969          
+target_city <- "NEW YORK"   
 
 city_20yrs <- measles_df %>%
   filter(year >= start_year,
@@ -878,7 +874,7 @@ city_year_z <- city_year %>%
                        0)
   )
 
-# 5. Keep the 10 most anomalous years (highest z-scores)
+# 5. Keeping the 10 most anomalous years (highest z-scores)
 city_year_top10 <- city_year_z %>%
   slice_max(order_by = z_score, n = 10, with_ties = FALSE) %>%
   arrange(year) %>%
@@ -891,8 +887,8 @@ ggplot(city_year_top10,
            fill = anomaly)) +
   geom_col(width = 0.8) +
   scale_fill_manual(
-    values = c(`FALSE` = "#3498DB",    # blue: elevated but not extreme
-               `TRUE`  = "#E74C3C"),   # red: strong anomalies (z >= 2)
+    values = c(`FALSE` = "#3498DB",    
+               `TRUE`  = "#E74C3C"),  
     labels = c("Peak year", "Strong anomaly (z ≥ 2)"),
     name   = NULL
   ) +
@@ -966,9 +962,9 @@ p_cfr
 
 ```
 
-**Fig 11: Measles case‑fatality ratio (CFR) over time**
+**Fig 11: Measles case fatality ratio (CFR) over time**
 
-This plot shows the annual measles case‑fatality ratio in the United States, calculated as deaths divided by reported cases and plotted with a smoothed trend. The overall downward trajectory indicates that, over the decades, the risk of dying given a reported measles infection substantially decreased, reflecting improvements in clinical care, nutrition, general living conditions and possibly surveillance sensitivity.
+This plot shows the annual measles case fatality ratio in the United States, calculated as deaths divided by reported cases and plotted with a smoothed trend. The overall downward trajectory indicates that, over the decades, the risk of dying given a reported measles infection substantially decreased, reflecting improvements in clinical care, nutrition, general living conditions and possibly surveillance sensitivity.
 
 Short term fluctuations and minor peaks in the CFR curve suggest periods in which severity briefly worsened or reporting changed, but these are superimposed on a clear long term decline, illustrating how measles became progressively less lethal even as incidence itself was falling due to vaccination.​
 
@@ -1065,4 +1061,6 @@ Updated May 19, 2024. Accessed November 2, 2025. https://www.cdc.gov/measles/ab
 19. Infectious Diseases Society of America. Measles vaccination: Know the facts. Updated December 31, 2023. Accessed November 2, 2025.
 
 20. Roush SW, Murphy TV. Historical comparisons of morbidity and mortality for vaccine-preventable diseases in the United States. JAMA. 2007;298(18):2155-2163. doi:10.1001/jama.298.18.2155
+
+21. https://ourworldindata.org/
 ```
